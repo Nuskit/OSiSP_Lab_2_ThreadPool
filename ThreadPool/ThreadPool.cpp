@@ -1,29 +1,38 @@
 #include "ThreadPool.h"
+#include "Monitor.h"
 
-ThreadPool::ThreadPool(const UINT countPool):threadPool(countPool)
+ThreadPool::ThreadPool(const UINT maxCountPool, const UINT countPool):threadPool(countPool),monitor(new Monitor())
 {
-	_countPool = countPool;
-	CreatePool();
+	_minCountPool = _currentCountPool = countPool;
+	_maxCountPool = maxCountPool < countPool ? countPool : maxCountPool;
+	createPool();
 }
 
 ThreadPool::~ThreadPool()
 {
-	DeletePool();
+	deletePool();
+	delete monitor;
 }
 
-void ThreadPool::CreatePool()
+void ThreadPool::createPool()
 {
-	for (int i = 0; i < _countPool; i++)
-		CreateThread(NULL, 0, this->SimpleThread, NULL, 0, NULL);
+	for (int i = 0; i < _minCountPool; i++)
+		threadPool[i] = CreateThread(NULL, 0, this->simpleThread, NULL, 0, NULL);;
 }
 
 //TODO: wait, why all thread exit
-VOID ThreadPool::DeletePool()
+VOID ThreadPool::deletePool()
 {
+	//Wait all 
+
+	for (UINT i = 0; i < _currentCountPool; i++)
+		CloseHandle(threadPool[i]);
 	threadPool.clear();
 }
 
 DWORD ThreadPool::SimpleThread(LPVOID lpParam)
 {
-	return 0;
+	SleepCon
+	WaitCreai
+	EnterCriticalSection();
 }

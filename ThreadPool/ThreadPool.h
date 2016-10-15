@@ -3,17 +3,23 @@
 
 using namespace std;
 
+class Monitor;
 class ThreadPool
 {
-	ThreadPool(const UINT countPool);
+	ThreadPool(const UINT maxCountPool,const UINT countPool);
 	~ThreadPool();
-private:
-	VOID CreatePool();
-	VOID DeletePool();
-	
-	DWORD WINAPI SimpleThread(LPVOID lpParam);
 
-	UINT _countPool;
+	VOID addTask(LPVOID task);
+private:
+	VOID createPool();
+	VOID deletePool();
 	
+	DWORD WINAPI simpleThread(LPVOID lpParam);
+
+	UINT _minCountPool;
+	UINT _currentCountPool;
+	UINT _maxCountPool;
+
 	vector<HANDLE> threadPool;
+	Monitor *monitor;
 };
