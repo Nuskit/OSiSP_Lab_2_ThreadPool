@@ -9,9 +9,10 @@ public:
 	~Monitor();
 
 	void Enter();
-	bool TryEnter();
+	const bool TryEnter();
 	void Exit();
-	void Wait(const DWORD);
+	void Wait();
+	const bool Wait(const DWORD milliSeconds);
 	void Pulse();
 	void PulseAll();
 private:

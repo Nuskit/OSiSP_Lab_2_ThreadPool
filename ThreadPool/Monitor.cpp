@@ -17,7 +17,7 @@ void Monitor::Enter()
 	::EnterCriticalSection(&m_mutex);
 }
 
-bool Monitor::TryEnter()
+const bool Monitor::TryEnter()
 {
 	return ::TryEnterCriticalSection(&m_mutex);
 }
@@ -27,9 +27,14 @@ void Monitor::Exit()
 	::LeaveCriticalSection(&m_mutex);
 }
 
-void Monitor::Wait(const DWORD milliSeconds=INFINITE)
+void Monitor::Wait()
 {
-	::SleepConditionVariableCS(&m_condVar, &m_mutex, milliSeconds);
+	::SleepConditionVariableCS(&m_condVar, &m_mutex, INFINITE);
+}
+
+const bool Monitor::Wait(const DWORD milliSeconds)
+{
+	return ::SleepConditionVariableCS(&m_condVar, &m_mutex, milliSeconds);
 }
 
 void Monitor::Pulse()

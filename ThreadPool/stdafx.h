@@ -14,4 +14,6 @@
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
 #include <Windows.h>
+#include <list>
 #include <vector>
+#include <tuple>
