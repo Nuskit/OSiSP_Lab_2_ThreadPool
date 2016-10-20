@@ -6,7 +6,7 @@
 #include "Tasks.h"
 #include "Functor.h"
 
-#define TIMEOUT 5000
+#define TIMEOUT 1000
 
 ThreadInfo::ThreadInfo(ThreadPoolData* poolData, SimpleThread* simpleThread, LPVOID lpParam) :poolData(poolData), simpleThread(simpleThread), lpParam(lpParam)
 {
@@ -25,7 +25,6 @@ DWORD ThreadExtraWork::complete()
 		printf("Start wait current thread %d\n", GetCurrentThreadId());
 		threadInfo.poolData->decCountWorkPool();
 		waitTask();
-		threadInfo.poolData->incCountWorkPool();
 		printf("End wait current thread %d\n", GetCurrentThreadId());
 		tryCompleteTask();
 	}

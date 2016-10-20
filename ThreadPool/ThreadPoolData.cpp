@@ -11,6 +11,7 @@ ThreadPoolData::~ThreadPoolData()
 {
 	delete monitor;
 	delete waitDeleteMonitor;
+	delete tasks;
 }
 
 Monitor& ThreadPoolData::getMonitor()

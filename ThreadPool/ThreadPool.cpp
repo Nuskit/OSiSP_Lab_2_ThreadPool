@@ -36,7 +36,7 @@ VOID ThreadPool::addTask(const shared_ptr<ThreadDelegateFunctor>& task)
 
 void ThreadPool::createPool()
 {
-	for (UINT i = 0; i < _minCountPool; i++)
+	for (UINT i = 0; i < _minCountPool; ++i)
 	{
 		simpleThreads[i] = new SimpleThread(poolData);
 		simpleThreads[i]->run(NULL);
@@ -91,4 +91,5 @@ void ThreadPool::runTask(const shared_ptr<ThreadDelegateFunctor>& task)
 {
 	poolData->getTask().addTask(task);
 	poolData->getMonitor().Pulse();
+	poolData->incCountWorkPool();
 }

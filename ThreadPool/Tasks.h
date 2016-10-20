@@ -7,7 +7,8 @@ class Tasks
 {
 public:
 	Tasks();
-	std::shared_ptr<ThreadDelegateFunctor> getTask();
+	~Tasks();
+	const std::shared_ptr<ThreadDelegateFunctor> getTask();
 	void addTask(const std::shared_ptr<ThreadDelegateFunctor>& task);
 	size_t getTaskCount();
 private:

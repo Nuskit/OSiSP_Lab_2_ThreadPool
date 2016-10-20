@@ -7,10 +7,17 @@ Tasks::Tasks() :taskMonitor(new Monitor())
 {
 }
 
-std::shared_ptr<ThreadDelegateFunctor> Tasks::getTask()
+Tasks::~Tasks()
+{
+	tasks.clear();
+	delete taskMonitor;
+}
+
+const std::shared_ptr<ThreadDelegateFunctor> Tasks::getTask()
 {
 	taskMonitor->Enter();
 	auto task = tasks.front();
+	tasks.pop_front();
 	taskMonitor->Exit();
 	return task;
 }
