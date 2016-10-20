@@ -1,13 +1,16 @@
 #include "stdafx.h"
 #include "ThreadPool.h"
+#include "SimpleThread.h"
+#include "ThreadPoolData.h"
 #include "Monitor.h"
+#include "Functor.h"
+#include "Tasks.h"
+#include "ILogger.h"
 
-#define TIMEOUT 5000
-
-ThreadPool::ThreadPool(const UINT maxCountPool, const UINT countPool)
-	:threadPool(countPool),simpleThreads(countPool), monitor(new Monitor())
+ThreadPool::ThreadPool(const shared_ptr<ILogger>& logger, const UINT maxCountPool, const UINT countPool):
+	simpleThreads(countPool), poolData(new ThreadPoolData()), logger(logger)
 {
-	_minCountPool = _currentCountPool = countPool;
+	_minCountPool = countPool;
 	_maxCountPool = maxCountPool < countPool ? countPool : maxCountPool;
 	createPool();
 }
@@ -15,15 +18,28 @@ ThreadPool::ThreadPool(const UINT maxCountPool, const UINT countPool)
 ThreadPool::~ThreadPool()
 {
 	deletePool();
-	delete monitor;
+	delete poolData;
+}
+
+VOID ThreadPool::addTask(const shared_ptr<ThreadDelegateFunctor>& task)
+{
+	synchronizePool();
+	if (poolData->getCountWorkPool() == _maxCountPool)
+		printf("Max num task\n");//log max workThread
+	else
+	{
+		if (poolData->getCountWorkPool() >= _minCountPool)
+			generateThread();
+		runTask(task);
+	}
 }
 
 void ThreadPool::createPool()
 {
 	for (UINT i = 0; i < _minCountPool; i++)
 	{
-		simpleThreads[i] = new SimpleThread(monitor);
-		threadPool[i] = simpleThreads[i]->run(NULL);
+		simpleThreads[i] = new SimpleThread(poolData);
+		simpleThreads[i]->run(NULL);
 	}
 }
 
@@ -31,70 +47,48 @@ void ThreadPool::createPool()
 VOID ThreadPool::deletePool()
 {
 	//Wait all 
-	for (UINT i = 0; i < _currentCountPool; ++i)
-		simpleThreads[i]->setDiedState();
-	monitor->PulseAll();
+	for (UINT i = 0; i < simpleThreads.size(); ++i)
+		simpleThreads[i]->setAliveState();
+	
+	synchronizePool();
+	poolData->getMonitor().PulseAll();
 
-	WaitForMultipleObjects(_currentCountPool, &threadPool[0], true, INFINITE);
-	for (UINT i = 0; i < _currentCountPool; ++i)
-		CloseHandle(threadPool[i]);
-	threadPool.clear();
+	for (UINT i = 0; i < simpleThreads.size(); ++i)
+		delete simpleThreads[i];
+	simpleThreads.clear();
 }
 
-ThreadPool::SimpleThread::SimpleThread(Monitor* monitor):monitor(monitor),isAlive(false)
+//we need check, that thread in wait or other state
+void ThreadPool::synchronizePool()
 {
+	poolData->getMonitor().Enter();
+	poolData->getMonitor().Exit();
 }
 
-const HANDLE& ThreadPool::SimpleThread::run(LPVOID lpParam,const bool isAddedThread)
+void ThreadPool::generateThread()
 {
-	isAlive = true;
-	return 0;
-	//return CreateThread(NULL, 0, &(this->thread), lpParam, 0, NULL);
+	SimpleThread* currentThread = (poolData->getCountDeleteThread() > 0) ? getOldThread() : generateNewThread();
+	currentThread->run(NULL, true);
 }
 
-void ThreadPool::SimpleThread::setDiedState()
+SimpleThread* ThreadPool::getOldThread()
 {
-	isAlive = false;
+	auto thread = poolData->getFirstDeleteThread();
+	auto threadIt=std::find(simpleThreads.begin(), simpleThreads.end(), thread);
+	if (threadIt !=simpleThreads.end())
+			(*threadIt)->waitAndDeleteThreadHandle();
+	return (*threadIt);
 }
 
-DWORD ThreadPool::SimpleThread::thread(LPVOID lpParam)
+SimpleThread * ThreadPool::generateNewThread()
 {
-	do
-	{
-		monitor->Wait();
-	} while (isAlive);
-	return EXIT_SUCCESS;
+	auto newThread = new SimpleThread(poolData);
+	simpleThreads.push_back(newThread);
+	return newThread;
 }
 
-DWORD ThreadPool::SimpleThread::addedThread(LPVOID lpParam)
+void ThreadPool::runTask(const shared_ptr<ThreadDelegateFunctor>& task)
 {
-	do
-	{
-		isAlive &= monitor->Wait(TIMEOUT);//check what return command
-	} while (isAlive);
-	return EXIT_SUCCESS;
-}
-
-void ThreadPool::SimpleThread::tryCompleteTask()
-{
-	if (isAlive)
-	{
-		try
-		{
-			monitor->Enter();
-		}
-		catch(exception)
-		{
-			monitor->Exit();
-			throw;
-		}
-		monitor->Exit();
-	}
-}
-
-LPTHREAD_START_ROUTINE ThreadPool::SimpleThread::getThread(const bool isAddedThread)
-{
-	return NULL;
-//	return &this->addedThread;
-	//return isAddedThread ? this->addedThread : &this->thread;
+	poolData->getTask().addTask(task);
+	poolData->getMonitor().Pulse();
 }

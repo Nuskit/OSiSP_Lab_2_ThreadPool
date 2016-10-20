@@ -89,6 +89,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,22 +147,33 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConsoleLogger.h" />
+    <ClInclude Include="ILogger.h" />
     <ClInclude Include="Monitor.h" />
+    <ClInclude Include="SimpleThread.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Functor.h" />
+    <ClInclude Include="Tasks.h" />
+    <ClInclude Include="ThreadExtraWork.h" />
     <ClInclude Include="ThreadPool.h" />
+    <ClInclude Include="ThreadPoolData.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ConsoleLogger.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Monitor.cpp" />
+    <ClCompile Include="SimpleThread.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Tasks.cpp" />
+    <ClCompile Include="ThreadExtraWork.cpp" />
     <ClCompile Include="ThreadPool.cpp" />
+    <ClCompile Include="ThreadPoolData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

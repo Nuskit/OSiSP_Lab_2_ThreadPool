@@ -1,54 +1,34 @@
 #pragma once
 #include "stdafx.h"
-#include "Functor.h"
+#include <atomic>
 using namespace std;
 
-class Monitor;
+class ThreadDelegateFunctor;
+class SimpleThread;
+class ThreadPoolData;
+class ILogger;
 class ThreadPool
 {
 public:
-	ThreadPool(const UINT maxCountPool,const UINT countPool);
+	ThreadPool(const shared_ptr<ILogger>& logger,const UINT maxCountPool,const UINT countPool);
 	~ThreadPool();
 
-	VOID addTask(LPVOID task);
+	VOID addTask(const shared_ptr<ThreadDelegateFunctor>& task);
 private:
 	ThreadPool(const ThreadPool& object);
 	ThreadPool& operator=(const ThreadPool& object);
-
-	class SimpleThread
-	{
-	public:
-		SimpleThread(Monitor*);
-		const HANDLE& run(LPVOID lpParam,const bool isAddedThread=false);
-		void setDiedState();
-	private:
-		DWORD WINAPI thread(LPVOID lpParam);
-		DWORD WINAPI addedThread(LPVOID lpParam);
-		void tryCompleteTask();
-
-		LPTHREAD_START_ROUTINE getThread(const bool isAddedThread);
-
-		Monitor *monitor;
-		volatile bool isAlive;
-	};
-
-	/*class Tasks
-	{
-	public:
-		DelegateFunctor<void> getTask();
-	private:
-		list<DelegateFunctorImpl<> tasks;
-	};*/
-
+	
 	VOID createPool();
 	VOID deletePool();
-	
+	void generateThread();
+	void synchronizePool();
+	SimpleThread* getOldThread();
+	SimpleThread* generateNewThread();
+	void runTask(const shared_ptr<ThreadDelegateFunctor>& task);
 	UINT _minCountPool;
-	UINT _currentCountPool;
 	UINT _maxCountPool;
 	
-	vector<HANDLE> threadPool;
 	vector<SimpleThread*> simpleThreads;
-
-	Monitor* monitor;//change to unique_ptr
+	ThreadPoolData *poolData;
+	const shared_ptr<ILogger> logger;
 };

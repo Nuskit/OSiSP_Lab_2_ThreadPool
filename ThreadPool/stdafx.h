@@ -13,7 +13,12 @@
 
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
+#ifdef WIN32||WIN64
 #include <Windows.h>
+#endif
+
 #include <list>
 #include <vector>
 #include <tuple>
+#include <memory>
+#include <string>

@@ -1,15 +1,15 @@
 #pragma once
 #include "stdafx.h"
 
-class LinkDelegateFunctor
+class ThreadDelegateFunctor
 {
 public:
 	virtual void complete() = 0;
-	virtual ~LinkDelegateFunctor() {};
+	virtual ~ThreadDelegateFunctor() {};
 };
 
 template<typename R>
-class DelegateFunctor:public LinkDelegateFunctor
+class DelegateFunctor:public ThreadDelegateFunctor
 {
 public:
 	R complete() = 0;

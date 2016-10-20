@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "ThreadPool.h"
+#include "Functor.h"
+#include "ConsoleLogger.h"
 
 class Test1
 {
@@ -14,16 +16,21 @@ public:
 	}
 };
 
+
 int main()
 {
-	//ThreadPool threadPool(10,5);
+	ThreadPool* threadPool=new ThreadPool(*(new std::shared_ptr<ILogger>(new ConsoleLogger())), 10,5);
 	Test1* s = new Test1();
-	DelegateFunctor<void>* r = new DelegateFunctorImpl< void (Test1::*)(int)>(&Test1::someTest, s,7);
-	r->complete();
 
-	auto* as = new DelegateFunctorImpl< void (Test1::*)(int)>(&Test1::someTest,s,5);
-	as->complete();
-	//threadPool.addTask(s->someTesting);
+	ThreadDelegateFunctor* r = new DelegateFunctorImpl< void (Test1::*)(int)>(&Test1::someTest, s, 7);
+
+	auto as = new std::shared_ptr<ThreadDelegateFunctor>(new DelegateFunctorImpl< void (Test1::*)(int)>(&Test1::someTest,s,5));
+	threadPool->addTask(*as);
+	Sleep(500);
+	delete threadPool;
 	
+	getchar();
 	return 0;
 }
+
+
