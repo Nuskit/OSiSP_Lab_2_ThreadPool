@@ -3,6 +3,7 @@
 #include "ThreadPoolData.h"
 #include "Monitor.h"
 #include "ThreadExtraWork.h"
+#include "MonitorRAII.h"
 
 SimpleThread::SimpleThread(ThreadPoolData * poolData) :poolData(poolData), isAlive(false), threadHandle(nullptr)
 {
@@ -16,8 +17,9 @@ SimpleThread::~SimpleThread()
 void SimpleThread::run(LPVOID lpParam, const bool isAddedThread)
 {
 	isAlive = true;
-	poolData->incCountWorkPool();
+	MonitorRAII monitor(&poolData->getSyncStartThreadMonitor());
 	threadHandle = CreateThread(NULL, 0, &SimpleThreadWork::run, getThread(isAddedThread, lpParam), 0, NULL);
+	monitor.wait();
 }
 
 void SimpleThread::setAliveState(const bool value)

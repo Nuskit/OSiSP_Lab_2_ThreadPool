@@ -13,6 +13,6 @@ public:
 	size_t getTaskCount();
 private:
 	Monitor* taskMonitor;
-	std::list<std::shared_ptr<ThreadDelegateFunctor>> tasks;
+	std::queue<std::shared_ptr<ThreadDelegateFunctor>> tasks;
 };
 

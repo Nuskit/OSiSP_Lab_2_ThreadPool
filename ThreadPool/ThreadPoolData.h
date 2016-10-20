@@ -10,18 +10,20 @@ class ThreadPoolData
 public:
 	ThreadPoolData();
 	~ThreadPoolData();
-	Monitor& getMonitor();
+	Monitor& getThreadMonitor();
+	Monitor& getSyncStartThreadMonitor();
 	Tasks& getTask();
-	void incCountWorkPool();
-	void decCountWorkPool();
-	const UINT getCountWorkPool();
+	void incCountWorkTask();
+	void decCountWorkTask();
+	const UINT getCountWorkTask();
 	const SimpleThread* getFirstDeleteThread();
-	void addDeleteThread(const SimpleThread* thread);
+	void addDeleteThread(const SimpleThread*& thread);
 	size_t getCountDeleteThread();
 private:
-	std::atomic<UINT> currentWorkPool;
+	std::atomic<UINT> currentWorkTask;
   Tasks* tasks;
-	Monitor* monitor;
+	Monitor* threadMonitor;
+	Monitor* syncStartThreadMonitor;
 	Monitor* waitDeleteMonitor;
-	std::list<const SimpleThread*> waitDeleteThread;
+	std::queue<const SimpleThread*> waitDeleteThread;
 };

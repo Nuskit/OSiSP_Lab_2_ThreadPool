@@ -1,9 +1,14 @@
 #pragma once
+#include "stdafx.h"
 
-#include "Monitor.h"
-
-class MonitorRaii
+class Monitor;
+class MonitorRAII
 {
 public:
-	MonitorRaii();
+	MonitorRAII(Monitor* monitor);
+	void wait();
+	void pulse();
+	~MonitorRAII();
+private:
+	Monitor* monitor;
 };

@@ -10,6 +10,11 @@ public:
 	{
 		printf("%d\n", f);
 	}
+
+	void someTest1(void)
+	{
+		printf("%d\n", 7);
+	}
 	int someTesting()
 	{
 		static int i;
@@ -24,11 +29,10 @@ int main()
 	ThreadPool* threadPool=new ThreadPool(*(new std::shared_ptr<ILogger>(new ConsoleLogger())), 7,2);
 	Test1* s = new Test1();
 
-	ThreadDelegateFunctor* r = new DelegateFunctorImpl< void (Test1::*)(int)>(&Test1::someTest, s, 7);
+	auto r = new DelegateFunctorImpl< void (Test1::*)(int)>(&Test1::someTest, s, 7);
 
-	auto as = new std::shared_ptr<ThreadDelegateFunctor>(new DelegateFunctorImpl< void (Test1::*)(int)>(&Test1::someTest,s,5));
-	//auto st = new std::shared_ptr<ThreadDelegateFunctor>(new DelegateFunctorImpl< void (Test1::*)(void)>(&Test1::someTesting, s,nullptr));
-	for (int i=0;i<20;i++)
+	auto as = new std::shared_ptr<ThreadDelegateFunctor>(new DelegateFunctorImpl< void (Test1::*)(void)>(&Test1::someTest1,s));
+	for (int i=0;i<50;i++)
 		threadPool->addTask(*as);
 	//delete as;
 	Sleep(500);
@@ -36,6 +40,7 @@ int main()
 	Sleep(2000);
 
 	printf("Complete 23\n");
+	getchar();
 	delete threadPool;
 	getchar();
 	return 0;

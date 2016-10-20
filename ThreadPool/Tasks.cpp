@@ -2,6 +2,7 @@
 #include "Tasks.h"
 #include "Functor.h"
 #include "Monitor.h"
+#include "MonitorRAII.h"
 
 Tasks::Tasks() :taskMonitor(new Monitor())
 {
@@ -9,24 +10,23 @@ Tasks::Tasks() :taskMonitor(new Monitor())
 
 Tasks::~Tasks()
 {
-	tasks.clear();
+	std::queue<std::shared_ptr<ThreadDelegateFunctor>> empty;
+	std::swap(tasks, empty);
 	delete taskMonitor;
 }
 
 const std::shared_ptr<ThreadDelegateFunctor> Tasks::getTask()
 {
-	taskMonitor->Enter();
+	MonitorRAII taskMonitor(taskMonitor);
 	auto task = tasks.front();
-	tasks.pop_front();
-	taskMonitor->Exit();
+	tasks.pop();
 	return task;
 }
 
 void Tasks::addTask(const std::shared_ptr<ThreadDelegateFunctor>& task)
 {
-	taskMonitor->Enter();
-	tasks.push_back(task);
-	taskMonitor->Exit();
+	MonitorRAII taskMonitor(taskMonitor);
+	tasks.push(task);
 }
 
 size_t Tasks::getTaskCount()

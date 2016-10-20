@@ -5,6 +5,7 @@
 #include "SimpleThread.h"
 #include "Tasks.h"
 #include "Functor.h"
+#include "MonitorRAII.h"
 
 #define TIMEOUT 1000
 
@@ -18,20 +19,29 @@ ThreadExtraWork::ThreadExtraWork(ThreadPoolData * poolData, SimpleThread* simple
 
 DWORD ThreadExtraWork::complete()
 {
-	threadInfo.poolData->getMonitor().Enter();
+	MonitorRAII threadMonitor(&threadInfo.poolData->getThreadMonitor());
+	releaseMainThread();
 	printf("Enter current thread %d\n", GetCurrentThreadId());
 	while (threadInfo.simpleThread->getAliveState())
 	{
-		printf("Start wait current thread %d\n", GetCurrentThreadId());
-		threadInfo.poolData->decCountWorkPool();
+		printf("Start wait_ %d\n", GetCurrentThreadId());
 		waitTask();
-		printf("End wait current thread %d\n", GetCurrentThreadId());
+		printf("End wait_ %d\n", GetCurrentThreadId());
 		tryCompleteTask();
 	}
-	threadInfo.poolData->getMonitor().Exit();
 	printf("Exit current thread %d\n", GetCurrentThreadId());
-	threadInfo.poolData->decCountWorkPool();
+	notifyExit();
 	return EXIT_SUCCESS;
+}
+
+void ThreadExtraWork::releaseMainThread()
+{
+	MonitorRAII mainThreadMonitor(&threadInfo.poolData->getSyncStartThreadMonitor());
+	mainThreadMonitor.pulse();
+}
+
+ThreadExtraWork::~ThreadExtraWork()
+{
 }
 
 void ThreadExtraWork::tryCompleteTask()
@@ -48,32 +58,33 @@ void ThreadExtraWork::tryCompleteTask()
 			//logging error
 			printf("%s\n", e->what());
 		}
+		threadInfo.poolData->decCountWorkTask();
 	}
 }
 
-ThreadExtraWorkAllTime::ThreadExtraWorkAllTime(ThreadPoolData * poolData, SimpleThread * simpleThread, LPVOID lpParam):ThreadExtraWork(poolData, simpleThread, lpParam)
+ThreadExtraWorkAllTime::ThreadExtraWorkAllTime(ThreadPoolData * poolData, SimpleThread* simpleThread, LPVOID lpParam):ThreadExtraWork(poolData, simpleThread, lpParam)
 {
 }
 
 void ThreadExtraWorkAllTime::waitTask()
 {
-	threadInfo.poolData->getMonitor().Wait();
+	threadInfo.poolData->getThreadMonitor().Wait();
 }
 
 void ThreadExtraWorkAllTime::notifyExit()
 {
 }
 
-ThreadExtraWorkAnyTime::ThreadExtraWorkAnyTime(ThreadPoolData * poolData, SimpleThread * simpleThread, LPVOID lpParam):ThreadExtraWork(poolData, simpleThread, lpParam)
+ThreadExtraWorkAnyTime::ThreadExtraWorkAnyTime(ThreadPoolData * poolData, SimpleThread* simpleThread, LPVOID lpParam):ThreadExtraWork(poolData, simpleThread, lpParam)
 {
 }
 
 void ThreadExtraWorkAnyTime::waitTask()
 {
-	threadInfo.simpleThread->setAliveState(threadInfo.simpleThread->getAliveState() & threadInfo.poolData->getMonitor().Wait(TIMEOUT));//check what return command
+	threadInfo.simpleThread->setAliveState(threadInfo.simpleThread->getAliveState() & threadInfo.poolData->getThreadMonitor().Wait(TIMEOUT));//check what return command
 }
 
 void ThreadExtraWorkAnyTime::notifyExit()
 {
-	threadInfo.poolData->addDeleteThread(threadInfo.simpleThread);
+	threadInfo.poolData->addDeleteThread(const_cast<const SimpleThread *&>(threadInfo.simpleThread));
 }

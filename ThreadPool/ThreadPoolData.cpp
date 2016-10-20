@@ -2,21 +2,30 @@
 #include "ThreadPoolData.h"
 #include "Monitor.h"
 #include "Tasks.h"
+#include "MonitorRAII.h"
 
-ThreadPoolData::ThreadPoolData() :currentWorkPool(0), tasks(new Tasks()), monitor(new Monitor()), waitDeleteMonitor(new Monitor())
+ThreadPoolData::ThreadPoolData() :currentWorkTask(0), tasks(new Tasks()), threadMonitor(new Monitor()),syncStartThreadMonitor(new Monitor), waitDeleteMonitor(new Monitor())
 {
 }
 
 ThreadPoolData::~ThreadPoolData()
 {
-	delete monitor;
+	delete threadMonitor;
+	delete syncStartThreadMonitor;
 	delete waitDeleteMonitor;
 	delete tasks;
+	std::queue<const SimpleThread*> empty;
+	std::swap(waitDeleteThread, empty);
 }
 
-Monitor& ThreadPoolData::getMonitor()
+Monitor& ThreadPoolData::getThreadMonitor()
 {
-	return *monitor;
+	return *threadMonitor;
+}
+
+Monitor& ThreadPoolData::getSyncStartThreadMonitor()
+{
+	return *syncStartThreadMonitor;
 }
 
 Tasks& ThreadPoolData::getTask()
@@ -24,34 +33,33 @@ Tasks& ThreadPoolData::getTask()
 	return *tasks;
 }
 
-void ThreadPoolData::incCountWorkPool()
+void ThreadPoolData::incCountWorkTask()
 {
-	++currentWorkPool;
+	++currentWorkTask;
 }
 
-void ThreadPoolData::decCountWorkPool()
+void ThreadPoolData::decCountWorkTask()
 {
-	--currentWorkPool;
+	--currentWorkTask;
 }
 
-const UINT ThreadPoolData::getCountWorkPool()
+const UINT ThreadPoolData::getCountWorkTask()
 {
-	return currentWorkPool;
+	return currentWorkTask;
 }
 
 const SimpleThread* ThreadPoolData::getFirstDeleteThread()
 {
-	waitDeleteMonitor->Enter();
-	auto thread=waitDeleteThread.front();
-	waitDeleteMonitor->Exit();
-	return thread;
+	MonitorRAII waitDeleteMonitor(waitDeleteMonitor);
+	auto deleteThread = waitDeleteThread.front();
+	waitDeleteThread.pop();
+	return deleteThread;
 }
 
-void ThreadPoolData::addDeleteThread(const SimpleThread * thread)
+void ThreadPoolData::addDeleteThread(const SimpleThread *& thread)
 {
-	waitDeleteMonitor->Enter();
-	waitDeleteThread.push_back(thread);
-	waitDeleteMonitor->Exit();
+	MonitorRAII waitDeleteMonitor(waitDeleteMonitor);
+	waitDeleteThread.push(thread);
 }
 
 size_t ThreadPoolData::getCountDeleteThread()

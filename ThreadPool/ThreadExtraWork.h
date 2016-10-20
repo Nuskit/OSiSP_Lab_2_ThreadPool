@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 
-
 class SimpleThread;
 class ThreadExtraWork;
 class ThreadPoolData;
@@ -9,7 +8,7 @@ struct ThreadInfo
 {
 	ThreadInfo(ThreadPoolData* poolData, SimpleThread* simpleThread, LPVOID lpParam);
 	ThreadPoolData* poolData;
-	SimpleThread *simpleThread;
+	SimpleThread* simpleThread;
 	LPVOID lpParam;
 };
 
@@ -18,10 +17,11 @@ class ThreadExtraWork
 public:
 	ThreadExtraWork(ThreadPoolData* poolData, SimpleThread* simpleThread, LPVOID lpParam);
 	DWORD complete();
-	virtual ~ThreadExtraWork() {};
+	virtual ~ThreadExtraWork();
 private:
 	virtual void waitTask() = 0;
 	void tryCompleteTask();
+	void releaseMainThread();
 	virtual void notifyExit() = 0;
 protected:
 	ThreadInfo threadInfo;

@@ -147,9 +147,9 @@
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="ILogger.h" />
     <ClInclude Include="Monitor.h" />
+    <ClInclude Include="MonitorRAII.h" />
     <ClInclude Include="SimpleThread.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="Functor.h" />
     <ClInclude Include="Tasks.h" />
     <ClInclude Include="ThreadExtraWork.h" />
@@ -160,6 +160,7 @@
     <ClCompile Include="ConsoleLogger.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Monitor.cpp" />
+    <ClCompile Include="MonitorRAII.cpp" />
     <ClCompile Include="SimpleThread.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

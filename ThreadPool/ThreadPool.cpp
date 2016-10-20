@@ -6,6 +6,7 @@
 #include "Functor.h"
 #include "Tasks.h"
 #include "ILogger.h"
+#include "MonitorRAII.h"
 
 ThreadPool::ThreadPool(const shared_ptr<ILogger>& logger, const UINT maxCountPool, const UINT countPool):
 	simpleThreads(countPool), poolData(new ThreadPoolData()), logger(logger)
@@ -23,12 +24,13 @@ ThreadPool::~ThreadPool()
 
 VOID ThreadPool::addTask(const shared_ptr<ThreadDelegateFunctor>& task)
 {
-	synchronizePool();
-	if (poolData->getCountWorkPool() == _maxCountPool)
+	if (!poolData->getCountWorkTask())
+		synchronizePool();
+	if (poolData->getCountWorkTask() == _maxCountPool)
 		printf("Max num task\n");//log max workThread
 	else
 	{
-		if (poolData->getCountWorkPool() >= _minCountPool)
+		if (poolData->getCountWorkTask() >= _minCountPool)
 			generateThread();
 		runTask(task);
 	}
@@ -43,15 +45,13 @@ void ThreadPool::createPool()
 	}
 }
 
-//TODO: wait, why all thread exit
 VOID ThreadPool::deletePool()
 {
-	//Wait all 
 	for (UINT i = 0; i < simpleThreads.size(); ++i)
 		simpleThreads[i]->setAliveState();
 	
 	synchronizePool();
-	poolData->getMonitor().PulseAll();
+	poolData->getThreadMonitor().PulseAll();
 
 	for (UINT i = 0; i < simpleThreads.size(); ++i)
 		delete simpleThreads[i];
@@ -61,14 +61,16 @@ VOID ThreadPool::deletePool()
 //we need check, that thread in wait or other state
 void ThreadPool::synchronizePool()
 {
-	poolData->getMonitor().Enter();
-	poolData->getMonitor().Exit();
+	MonitorRAII threadMonitor(&poolData->getThreadMonitor());
 }
 
 void ThreadPool::generateThread()
 {
-	SimpleThread* currentThread = (poolData->getCountDeleteThread() > 0) ? getOldThread() : generateNewThread();
-	currentThread->run(NULL, true);
+	if (simpleThreads.size() - poolData->getCountDeleteThread() <= poolData->getCountWorkTask())
+	{
+		SimpleThread* currentThread = (poolData->getCountDeleteThread() > 0) ? getOldThread() : generateNewThread();
+		currentThread->run(NULL, true);
+	}
 }
 
 SimpleThread* ThreadPool::getOldThread()
@@ -90,6 +92,6 @@ SimpleThread * ThreadPool::generateNewThread()
 void ThreadPool::runTask(const shared_ptr<ThreadDelegateFunctor>& task)
 {
 	poolData->getTask().addTask(task);
-	poolData->getMonitor().Pulse();
-	poolData->incCountWorkPool();
+	poolData->getThreadMonitor().Pulse();
+	poolData->incCountWorkTask();
 }

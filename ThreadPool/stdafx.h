@@ -5,13 +5,6 @@
 
 #pragma once
 
-#include "targetver.h"
-
-#include <stdio.h>
-#include <tchar.h>
-
-
-
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
 #ifdef WIN32||WIN64
 #include <Windows.h>
@@ -20,5 +13,6 @@
 #include <list>
 #include <vector>
 #include <tuple>
+#include <queue>
 #include <memory>
 #include <string>
