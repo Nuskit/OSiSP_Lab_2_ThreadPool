@@ -1,36 +1,37 @@
 #include "stdafx.h"
 #include "ThreadPoolData.h"
-#include "Monitor.h"
+#include "Semaphore.h"
+#include "Mutex.h"
+#include "MutexRAII.h"
 #include "Tasks.h"
-#include "MonitorRAII.h"
 
-ThreadPoolData::ThreadPoolData() :currentWorkTask(0), tasks(new Tasks()), threadMonitor(new Monitor()),syncStartThreadMonitor(new Monitor), waitDeleteMonitor(new Monitor())
+ThreadPoolData::ThreadPoolData(const std::shared_ptr<ILogger>& logger) 
+	: currentWorkTask(0), tasks(new Tasks()), threadSemaphore(new Semaphore()), waitDeleteMutex(new Mutex()),logger_(logger)
 {
 }
 
 ThreadPoolData::~ThreadPoolData()
 {
-	delete threadMonitor;
-	delete syncStartThreadMonitor;
-	delete waitDeleteMonitor;
+	delete threadSemaphore;
+	delete waitDeleteMutex;
 	delete tasks;
 	std::queue<const SimpleThread*> empty;
 	std::swap(waitDeleteThread, empty);
 }
 
-Monitor& ThreadPoolData::getThreadMonitor()
+Semaphore& ThreadPoolData::getThreadSemaphore()
 {
-	return *threadMonitor;
+	return *threadSemaphore;
 }
 
-Monitor& ThreadPoolData::getSyncStartThreadMonitor()
-{
-	return *syncStartThreadMonitor;
-}
-
-Tasks& ThreadPoolData::getTask()
+Tasks& ThreadPoolData::getTasks()
 {
 	return *tasks;
+}
+
+std::shared_ptr<ILogger> & ThreadPoolData::getLogger()
+{
+	return logger_;
 }
 
 void ThreadPoolData::incCountWorkTask()
@@ -50,7 +51,7 @@ const UINT ThreadPoolData::getCountWorkTask()
 
 const SimpleThread* ThreadPoolData::getFirstDeleteThread()
 {
-	MonitorRAII waitDeleteMonitor(waitDeleteMonitor);
+	MutexRAII waitMutex(waitDeleteMutex);
 	auto deleteThread = waitDeleteThread.front();
 	waitDeleteThread.pop();
 	return deleteThread;
@@ -58,7 +59,7 @@ const SimpleThread* ThreadPoolData::getFirstDeleteThread()
 
 void ThreadPoolData::addDeleteThread(const SimpleThread *& thread)
 {
-	MonitorRAII waitDeleteMonitor(waitDeleteMonitor);
+	MutexRAII waitMutex(waitDeleteMutex);
 	waitDeleteThread.push(thread);
 }
 

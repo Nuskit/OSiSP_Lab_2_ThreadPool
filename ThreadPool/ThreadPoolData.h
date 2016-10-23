@@ -2,17 +2,19 @@
 #include "stdafx.h"
 #include <atomic>
 
-class Monitor;
+class Semaphore;
+class Mutex;
 class Tasks;
 class SimpleThread;
+class ILogger;
 class ThreadPoolData
 {
 public:
-	ThreadPoolData();
+	ThreadPoolData(const std::shared_ptr<ILogger>& logger);
 	~ThreadPoolData();
-	Monitor& getThreadMonitor();
-	Monitor& getSyncStartThreadMonitor();
-	Tasks& getTask();
+	Semaphore& getThreadSemaphore();
+	Tasks& getTasks();
+	std::shared_ptr<ILogger>& getLogger();
 	void incCountWorkTask();
 	void decCountWorkTask();
 	const UINT getCountWorkTask();
@@ -22,8 +24,8 @@ public:
 private:
 	std::atomic<UINT> currentWorkTask;
   Tasks* tasks;
-	Monitor* threadMonitor;
-	Monitor* syncStartThreadMonitor;
-	Monitor* waitDeleteMonitor;
+	Semaphore* threadSemaphore;
+	Mutex* waitDeleteMutex;
 	std::queue<const SimpleThread*> waitDeleteThread;
+	std::shared_ptr<ILogger> logger_;
 };

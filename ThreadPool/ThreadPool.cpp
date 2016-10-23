@@ -2,96 +2,142 @@
 #include "ThreadPool.h"
 #include "SimpleThread.h"
 #include "ThreadPoolData.h"
-#include "Monitor.h"
+#include "Semaphore.h"
 #include "Functor.h"
 #include "Tasks.h"
 #include "ILogger.h"
-#include "MonitorRAII.h"
 
-ThreadPool::ThreadPool(const shared_ptr<ILogger>& logger, const UINT maxCountPool, const UINT countPool):
-	simpleThreads(countPool), poolData(new ThreadPoolData()), logger(logger)
+ThreadPool::ThreadPool(const shared_ptr<ILogger>& logger, const UINT countPool, const UINT maxCountPool) :
+	simpleThreads(countPool), poolData(new ThreadPoolData(logger)), isCreatePool(false)
 {
-	_minCountPool = countPool;
-	_maxCountPool = maxCountPool < countPool ? countPool : maxCountPool;
-	createPool();
+	setMaxCountPoolNotLessThanCountPool(countPool, maxCountPool);
+	if (maxCountPool_ <= MAX_COUNT_SEMAPHORE)
+	{
+		minCountPool_ = countPool;
+		createPool();
+		isCreatePool = true;
+	}
+	else
+	{
+		poolData->getLogger()->errorCreateThreadPool(maxCountPool_);
+	}
+}
+
+void ThreadPool::setMaxCountPoolNotLessThanCountPool(const UINT countPool,UINT maxCountPool)
+{
+	maxCountPool_ = maxCountPool < countPool ? countPool : maxCountPool;
 }
 
 ThreadPool::~ThreadPool()
 {
-	deletePool();
+	if (havePool())
+		deletePool();
 	delete poolData;
 }
 
-VOID ThreadPool::addTask(const shared_ptr<ThreadDelegateFunctor>& task)
+void ThreadPool::addTask(const shared_ptr<ThreadDelegateFunctor>& task)
 {
-	if (!poolData->getCountWorkTask())
-		synchronizePool();
-	if (poolData->getCountWorkTask() == _maxCountPool)
-		printf("Max num task\n");//log max workThread
-	else
+	if (havePool())
 	{
-		if (poolData->getCountWorkTask() >= _minCountPool)
-			generateThread();
-		runTask(task);
+		if (!isMaxCountWorkTask())
+		{
+			if (isCountWorkTaskMoreThanMinimalCountPool())
+				addNewThread();
+			runTask(task);
+		}
+		else
+			poolData->getLogger()->errorMaxTask();
 	}
+}
+
+const bool ThreadPool::isMaxCountWorkTask()
+{
+	return poolData->getCountWorkTask() == maxCountPool_;
+}
+
+const bool ThreadPool::isCountWorkTaskMoreThanMinimalCountPool()
+{
+	return poolData->getCountWorkTask() >= minCountPool_;
+}
+
+const bool ThreadPool::havePool()
+{
+	return isCreatePool;
 }
 
 void ThreadPool::createPool()
 {
-	for (UINT i = 0; i < _minCountPool; ++i)
+	for (UINT i = 0; i < minCountPool_; ++i)
 	{
-		simpleThreads[i] = new SimpleThread(poolData);
+		simpleThreads[i] = generateThread();
 		simpleThreads[i]->run(NULL);
 	}
+	poolData->getLogger()->createThreadPool(minCountPool_);
 }
 
-VOID ThreadPool::deletePool()
+void ThreadPool::deletePool()
+{
+	setSimpleThreadTerminatedCondition();
+	deleteSimpleThread();
+}
+
+void ThreadPool::setSimpleThreadTerminatedCondition()
 {
 	for (UINT i = 0; i < simpleThreads.size(); ++i)
-		simpleThreads[i]->setAliveState();
-	
-	synchronizePool();
-	poolData->getThreadMonitor().PulseAll();
+		simpleThreads[i]->setAliveState(false);
+	poolData->getThreadSemaphore().pulseAll();
+}
 
+void ThreadPool::deleteSimpleThread()
+{
 	for (UINT i = 0; i < simpleThreads.size(); ++i)
 		delete simpleThreads[i];
 	simpleThreads.clear();
 }
 
-//we need check, that thread in wait or other state
-void ThreadPool::synchronizePool()
+void ThreadPool::addNewThread()
 {
-	MonitorRAII threadMonitor(&poolData->getThreadMonitor());
-}
-
-void ThreadPool::generateThread()
-{
-	if (simpleThreads.size() - poolData->getCountDeleteThread() <= poolData->getCountWorkTask())
+	if (isWorkTaskMoreThanAliveThread())
 	{
-		SimpleThread* currentThread = (poolData->getCountDeleteThread() > 0) ? getOldThread() : generateNewThread();
+		SimpleThread* currentThread = (poolData->getCountDeleteThread() > 0) ? getDeleteThread() : createNewThread();
 		currentThread->run(NULL, true);
 	}
 }
 
-SimpleThread* ThreadPool::getOldThread()
+const bool ThreadPool::isWorkTaskMoreThanAliveThread()
 {
-	auto thread = poolData->getFirstDeleteThread();
-	auto threadIt=std::find(simpleThreads.begin(), simpleThreads.end(), thread);
-	if (threadIt !=simpleThreads.end())
-			(*threadIt)->waitAndDeleteThreadHandle();
+	return simpleThreads.size() - poolData->getCountDeleteThread() <= poolData->getCountWorkTask();
+}
+
+const SimpleThread* ThreadPool::getFirstDeleteThread()
+{
+	return poolData->getFirstDeleteThread();
+}
+
+SimpleThread* ThreadPool::getDeleteThread()
+{
+	auto threadIt = std::find(simpleThreads.begin(), simpleThreads.end(), getFirstDeleteThread());
+	if (threadIt != simpleThreads.end())
+		(*threadIt)->waitAndDeleteThreadHandle();
 	return (*threadIt);
 }
 
-SimpleThread * ThreadPool::generateNewThread()
+SimpleThread * ThreadPool::createNewThread()
 {
-	auto newThread = new SimpleThread(poolData);
+	auto newThread = generateThread();
 	simpleThreads.push_back(newThread);
 	return newThread;
 }
 
+SimpleThread * ThreadPool::generateThread()
+{
+	return new SimpleThread(poolData);
+}
+
 void ThreadPool::runTask(const shared_ptr<ThreadDelegateFunctor>& task)
 {
-	poolData->getTask().addTask(task);
-	poolData->getThreadMonitor().Pulse();
+	poolData->getTasks().addTask(task);
+	poolData->getThreadSemaphore().pulse();
 	poolData->incCountWorkTask();
+	poolData->getLogger()->addTaskPool(task);
 }

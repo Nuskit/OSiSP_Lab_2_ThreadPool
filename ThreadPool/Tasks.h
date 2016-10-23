@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 class ThreadDelegateFunctor;
-class Monitor;
+class Mutex;
 class Tasks
 {
 public:
@@ -12,7 +12,7 @@ public:
 	void addTask(const std::shared_ptr<ThreadDelegateFunctor>& task);
 	size_t getTaskCount();
 private:
-	Monitor* taskMonitor;
+	Mutex* taskMutex;
 	std::queue<std::shared_ptr<ThreadDelegateFunctor>> tasks;
 };
 

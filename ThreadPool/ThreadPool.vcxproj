@@ -90,6 +90,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <ExceptionHandling>Async</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -146,8 +147,9 @@
   <ItemGroup>
     <ClInclude Include="ConsoleLogger.h" />
     <ClInclude Include="ILogger.h" />
-    <ClInclude Include="Monitor.h" />
-    <ClInclude Include="MonitorRAII.h" />
+    <ClInclude Include="Mutex.h" />
+    <ClInclude Include="MutexRAII.h" />
+    <ClInclude Include="Semaphore.h" />
     <ClInclude Include="SimpleThread.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Functor.h" />
@@ -159,8 +161,9 @@
   <ItemGroup>
     <ClCompile Include="ConsoleLogger.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Monitor.cpp" />
-    <ClCompile Include="MonitorRAII.cpp" />
+    <ClCompile Include="Mutex.cpp" />
+    <ClCompile Include="MutexRAII.cpp" />
+    <ClCompile Include="Semaphore.cpp" />
     <ClCompile Include="SimpleThread.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

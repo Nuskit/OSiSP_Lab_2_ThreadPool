@@ -6,8 +6,9 @@ class ThreadDelegateFunctor;
 class ILogger
 {
 public:
+	virtual void errorCreateThreadPool(UINT count) = 0;
 	virtual void createThreadPool(UINT count) = 0;
-	virtual void addTaskPool(std::shared_ptr<ThreadDelegateFunctor>& task) = 0;
-	virtual void errorWorkPool(std::exception& error) = 0;
-	virtual void warningWorkPool(std::string message) = 0;
+	virtual void addTaskPool(const std::shared_ptr<ThreadDelegateFunctor>& task) = 0;
+	virtual void errorWorkPool(const std::shared_ptr<ThreadDelegateFunctor>& task, const std::exception* error = nullptr) = 0;
+	virtual void errorMaxTask() = 0;
 };

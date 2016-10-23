@@ -6,7 +6,7 @@
 #pragma once
 
 // TODO: Установите здесь ссылки на дополнительные заголовки, требующиеся для программы
-#ifdef WIN32||WIN64
+#if (defined(WIN32) || defined(WIN64))
 #include <Windows.h>
 #endif
 
@@ -16,3 +16,4 @@
 #include <queue>
 #include <memory>
 #include <string>
+#include <istream>

@@ -21,7 +21,6 @@ public:
 private:
 	virtual void waitTask() = 0;
 	void tryCompleteTask();
-	void releaseMainThread();
 	virtual void notifyExit() = 0;
 protected:
 	ThreadInfo threadInfo;

@@ -3,6 +3,8 @@
 #include <atomic>
 using namespace std;
 
+#define DEFAULT_WORK_THREAD_POOL 4
+
 class ThreadDelegateFunctor;
 class SimpleThread;
 class ThreadPoolData;
@@ -10,25 +12,33 @@ class ILogger;
 class ThreadPool
 {
 public:
-	ThreadPool(const shared_ptr<ILogger>& logger,const UINT maxCountPool,const UINT countPool);
+	ThreadPool(const shared_ptr<ILogger>& logger,const UINT countPool= DEFAULT_WORK_THREAD_POOL, const UINT maxCountPool = DEFAULT_WORK_THREAD_POOL);
 	~ThreadPool();
 
-	VOID addTask(const shared_ptr<ThreadDelegateFunctor>& task);
+	void addTask(const shared_ptr<ThreadDelegateFunctor>& task);
+	const bool havePool();
 private:
 	ThreadPool(const ThreadPool& object);
 	ThreadPool& operator=(const ThreadPool& object);
-	
-	VOID createPool();
-	VOID deletePool();
-	void generateThread();
-	void synchronizePool();
-	SimpleThread* getOldThread();
-	SimpleThread* generateNewThread();
+
+	void setMaxCountPoolNotLessThanCountPool(const UINT countPool,UINT maxCountPool);
+	void createPool();
+	void deletePool();
+	void addNewThread();
+	SimpleThread* getDeleteThread();
+	SimpleThread* createNewThread();
+	SimpleThread* generateThread();
+	const SimpleThread* getFirstDeleteThread();
+	const bool isWorkTaskMoreThanAliveThread();
+	const bool isMaxCountWorkTask();
+	const bool isCountWorkTaskMoreThanMinimalCountPool();
+	void deleteSimpleThread();
+	void setSimpleThreadTerminatedCondition();
 	void runTask(const shared_ptr<ThreadDelegateFunctor>& task);
-	UINT _minCountPool;
-	UINT _maxCountPool;
 	
+	UINT minCountPool_;
+	UINT maxCountPool_;
 	vector<SimpleThread*> simpleThreads;
 	ThreadPoolData *poolData;
-	const shared_ptr<ILogger> logger;
+	bool isCreatePool;
 };

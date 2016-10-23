@@ -1,10 +1,10 @@
 #include "stdafx.h"
 #include "Tasks.h"
 #include "Functor.h"
-#include "Monitor.h"
-#include "MonitorRAII.h"
+#include "Mutex.h"
+#include "MutexRAII.h"
 
-Tasks::Tasks() :taskMonitor(new Monitor())
+Tasks::Tasks() :taskMutex(new Mutex())
 {
 }
 
@@ -12,12 +12,12 @@ Tasks::~Tasks()
 {
 	std::queue<std::shared_ptr<ThreadDelegateFunctor>> empty;
 	std::swap(tasks, empty);
-	delete taskMonitor;
+	delete taskMutex;
 }
 
 const std::shared_ptr<ThreadDelegateFunctor> Tasks::getTask()
 {
-	MonitorRAII taskMonitor(taskMonitor);
+	MutexRAII taskMutex(taskMutex);
 	auto task = tasks.front();
 	tasks.pop();
 	return task;
@@ -25,7 +25,7 @@ const std::shared_ptr<ThreadDelegateFunctor> Tasks::getTask()
 
 void Tasks::addTask(const std::shared_ptr<ThreadDelegateFunctor>& task)
 {
-	MonitorRAII taskMonitor(taskMonitor);
+	MutexRAII taskMutex(taskMutex);
 	tasks.push(task);
 }
 

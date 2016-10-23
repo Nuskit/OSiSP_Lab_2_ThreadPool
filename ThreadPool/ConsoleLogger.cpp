@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ConsoleLogger.h"
 #include <iostream>
+#include "Functor.h"
 using namespace std;
 
 
@@ -9,17 +10,28 @@ void ConsoleLogger::createThreadPool(UINT count)
 	cout << "Create ThreadPool at " << count << " count." << endl;
 }
 
-void ConsoleLogger::addTaskPool(std::shared_ptr<ThreadDelegateFunctor>& task)
+void ConsoleLogger::addTaskPool(const std::shared_ptr<ThreadDelegateFunctor>& task)
 {
-	cout << "Add new task " << task << endl;
+	cout << "Add new task " << task << "- ";
+	task->toString(cout);
+	cout << endl;
 }
 
-void ConsoleLogger::errorWorkPool(std::exception & error)
+void ConsoleLogger::errorMaxTask()
 {
-	cout << "Error complete " << error.what() << endl;
+	cout << "Max complete task" << endl;
 }
 
-void ConsoleLogger::warningWorkPool(std::string message)
+void ConsoleLogger::errorWorkPool(const std::shared_ptr<ThreadDelegateFunctor>& task, const std::exception* error)
 {
-	cout << "Warning, " << message << endl;
+	cout << "Error complete -";
+	task->toString(cout);
+	if (error)
+		cout << " Because" << endl <<error->what();
+	cout << endl;
+}
+
+void ConsoleLogger::errorCreateThreadPool(UINT count)
+{
+	cout << "Don't create pool at " << count << " count." << endl;
 }

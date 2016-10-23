@@ -3,6 +3,7 @@
 
 class ThreadPoolData;
 class ThreadExtraWork;
+class ILogger;
 class SimpleThread
 {
 public:

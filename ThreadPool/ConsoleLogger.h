@@ -5,8 +5,9 @@
 
 class ConsoleLogger :public ILogger
 {
+	virtual void errorCreateThreadPool(UINT count) override;
 	virtual void createThreadPool(UINT count) override;
-	virtual void addTaskPool(std::shared_ptr<ThreadDelegateFunctor>& task) override;
-	virtual void errorWorkPool(std::exception & error) override;
-	virtual void warningWorkPool(std::string message) override;
+	virtual void addTaskPool(const std::shared_ptr<ThreadDelegateFunctor>& task) override;
+	virtual void errorWorkPool(const std::shared_ptr<ThreadDelegateFunctor>& task, const std::exception* error) override;
+	virtual void errorMaxTask() override;
 };
