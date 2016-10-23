@@ -19,19 +19,29 @@ public:
 template<typename ... Args> class DelegateFunctorImpl;
 
 template<typename R, typename ... Args>
-class DelegateFunctorImpl<R(Args ...)>
+class DelegateFunctorImpl<R(Args ...)> :public DelegateFunctor<R>
 {
 public:
 	typedef R(*FT)(Args ...);
 
-	DelegateFunctorImpl(FT methodFunction,Args&&... args) : methodFunction_(methodFunction),m_args(std::forward_as_tuple<Args>(args)...) { ; }
+	DelegateFunctorImpl(FT fn,Args&&... args) : m_fn(fn),m_args(std::forward<Args>(args)...) {  }
 
 	R complete()
 	{
-		return methodFunction_(m_args);
+		return m_fn(std::get<Args>(m_args)...);
+	}
+
+	void setArgs(Args&&... args)
+	{
+		m_args = std::make_tuple(args...);
+	}
+
+	void toString(std::ostream& stream)
+	{
+		stream << "WithOut object";
 	}
 private:
-	FT methodFunction_;
+	FT m_fn;
 	std::tuple<Args...> m_args;
 };
 
@@ -42,7 +52,7 @@ public:
 	typedef R(T::*FT)(Args ...);
 	typedef T HostType;
 
-	DelegateFunctorImpl(FT fn, T* obj, Args&&... args) : m_fn(fn), m_obj(obj), m_args(std::forward<Args>(args)...) { ; }
+	DelegateFunctorImpl(FT fn, T* obj, Args&&... args) : m_fn(fn), m_obj(obj), m_args(std::forward<Args>(args)...) {  }
 
 	R complete()
 	{
