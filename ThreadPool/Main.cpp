@@ -3,66 +3,60 @@
 #include "Functor.h"
 #include "ConsoleLogger.h"
 
-class Test1
+class TestClass
 {
 public:
-	void someTest(int f)
+	void methodWithArgument(int value)
 	{
-		printf("value %d\n", f);
+		printf("Method value %d\n", value);
 		Sleep(30);
 	}
 
-	Test1()
+	TestClass()
 	{
 		++id;
 	}
 
-	void someTest1(void)
+	void MethodWithoutArgument(void)
 	{
 		static int i = -5;
-		printf("%d\n", i++);
+		printf("Method static value =%d\n", i++);
 		if (++i % 10)
 		{
 			throw 9;
 		}
 	}
 
-	int someTesting()
-	{
-		static int i;
-		printf("some %d\n", i++);
-		return 0;
-	}
-
 	void toString(ostream& stream)
 	{
-		stream << "Test task " << id << ".";
+		stream << "Test object " << id << ".";
 	}
 
 private:
 	static atomic_int id;
 };
-atomic_int Test1::id = 0;
+atomic_int TestClass::id = 0;
 
 
 int main()
 {
 	ThreadPool* threadPool=new ThreadPool(*(new std::shared_ptr<ILogger>(new ConsoleLogger())), 4,7);
-	Test1* s = new Test1();
+	TestClass* testObject = new TestClass();
+	int&& argument = 7;
 
-	auto r = new std::shared_ptr<ThreadDelegateFunctor>(new DelegateFunctorImpl< void (Test1::*)(int)>(&Test1::someTest, s, 7));
+	auto testFunctorWithArgument = new std::shared_ptr<ThreadDelegateFunctor>(new DelegateFunctorImpl< void (TestClass::*)(int)>(&TestClass::methodWithArgument, testObject, std::move(argument)));
 
-	auto as = new std::shared_ptr<ThreadDelegateFunctor>(new DelegateFunctorImpl< void (Test1::*)(void)>(&Test1::someTest1,s));
+	auto testFunctorWithoutArgument = new std::shared_ptr<ThreadDelegateFunctor>(new DelegateFunctorImpl< void (TestClass::*)(void)>(&TestClass::MethodWithoutArgument,testObject));
 	Sleep(100);
 	for (int i = 0; i < 20; i++)
 	{
-		threadPool->addTask(*as);
-		threadPool->addTask(*r);
+		threadPool->addTask(*testFunctorWithoutArgument);
+		threadPool->addTask(*testFunctorWithArgument);
+		++argument;
+		dynamic_cast<DelegateFunctorImpl< void (TestClass::*)(int)>*>(testFunctorWithArgument->get())->setArgs(std::move(argument));
 	}
 	printf("Complete\n");
-	Sleep(2000);
-
-	printf("Complete 23\n");
+	Sleep(1500);
 	delete threadPool;
 	getchar();
 	return 0;

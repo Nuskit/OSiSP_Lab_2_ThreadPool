@@ -51,7 +51,7 @@ public:
 
 	void setArgs(Args&&... args)
 	{
-		m_args = std::forward<Args>(args)...;
+		m_args = std::make_tuple(args...);
 	}
 
 	void toString(std::ostream& stream)
