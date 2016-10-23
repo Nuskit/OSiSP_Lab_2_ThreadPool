@@ -13,13 +13,22 @@ ThreadInfo::ThreadInfo(ThreadPoolData* poolData, SimpleThread* simpleThread, LPV
 {
 }
 
-ThreadExtraWork::ThreadExtraWork(ThreadPoolData * poolData, SimpleThread* simpleThread, LPVOID lpParam) :threadInfo(poolData, simpleThread, lpParam)
+ThreadExtraWork::ThreadExtraWork(ThreadPoolData * poolData, SimpleThread* simpleThread, LPVOID lpParam) : threadInfo(poolData, simpleThread, lpParam), isAlive(true)
 {
+}
+
+ThreadExtraWork::~ThreadExtraWork()
+{
+}
+
+const bool ThreadExtraWork::isCanCompleteWork()
+{
+	return isAlive&&threadInfo.simpleThread->getAliveState();
 }
 
 DWORD ThreadExtraWork::complete()
 {
-	while (threadInfo.simpleThread->getAliveState())
+	while (isCanCompleteWork())
 	{
 		waitTask();
 		tryCompleteTask();
@@ -28,13 +37,9 @@ DWORD ThreadExtraWork::complete()
 	return EXIT_SUCCESS;
 }
 
-ThreadExtraWork::~ThreadExtraWork()
-{
-}
-
 void ThreadExtraWork::tryCompleteTask()
 {
-	if (threadInfo.simpleThread->getAliveState())
+	if (isCanCompleteWork())
 	{
 		auto task = threadInfo.poolData->getTasks().getTask();
 		try
@@ -54,7 +59,7 @@ void ThreadExtraWork::tryCompleteTask()
 	}
 }
 
-ThreadExtraWorkAllTime::ThreadExtraWorkAllTime(ThreadPoolData * poolData, SimpleThread* simpleThread, LPVOID lpParam):ThreadExtraWork(poolData, simpleThread, lpParam)
+ThreadExtraWorkAllTime::ThreadExtraWorkAllTime(ThreadPoolData * poolData, SimpleThread* simpleThread, LPVOID lpParam) :ThreadExtraWork(poolData, simpleThread, lpParam)
 {
 }
 
@@ -67,13 +72,13 @@ void ThreadExtraWorkAllTime::notifyExit()
 {
 }
 
-ThreadExtraWorkAnyTime::ThreadExtraWorkAnyTime(ThreadPoolData * poolData, SimpleThread* simpleThread, LPVOID lpParam):ThreadExtraWork(poolData, simpleThread, lpParam)
+ThreadExtraWorkAnyTime::ThreadExtraWorkAnyTime(ThreadPoolData * poolData, SimpleThread* simpleThread, LPVOID lpParam) :ThreadExtraWork(poolData, simpleThread, lpParam)
 {
 }
 
 void ThreadExtraWorkAnyTime::waitTask()
 {
-	threadInfo.simpleThread->setAliveState(threadInfo.simpleThread->getAliveState() & threadInfo.poolData->getThreadSemaphore().wait(WAIT_TIMEOUT_TIME));
+	isAlive = isAlive&& threadInfo.poolData->getThreadSemaphore().wait(WAIT_TIMEOUT_TIME);
 }
 
 void ThreadExtraWorkAnyTime::notifyExit()

@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="ConsoleLogger.cpp">
+      <Filter>Loggers</Filter>
+    </ClCompile>
+    <ClCompile Include="FileLogger.cpp">
+      <Filter>Loggers</Filter>
+    </ClCompile>
+    <ClCompile Include="Mutex.cpp">
+      <Filter>Syncronization</Filter>
+    </ClCompile>
+    <ClCompile Include="MutexRAII.cpp">
+      <Filter>Syncronization</Filter>
+    </ClCompile>
+    <ClCompile Include="Semaphore.cpp">
+      <Filter>Syncronization</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadExtraWork.cpp">
+      <Filter>ThreadPool</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadPool.cpp">
+      <Filter>ThreadPool</Filter>
+    </ClCompile>
+    <ClCompile Include="ThreadPoolData.cpp">
+      <Filter>ThreadPool</Filter>
+    </ClCompile>
+    <ClCompile Include="Tasks.cpp">
+      <Filter>ThreadPool</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleThread.cpp">
+      <Filter>ThreadPool</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseLogger.cpp">
+      <Filter>Loggers</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Functor.h" />
+    <ClInclude Include="ConsoleLogger.h">
+      <Filter>Loggers</Filter>
+    </ClInclude>
+    <ClInclude Include="FileLogger.h">
+      <Filter>Loggers</Filter>
+    </ClInclude>
+    <ClInclude Include="ILogger.h">
+      <Filter>Loggers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mutex.h">
+      <Filter>Syncronization</Filter>
+    </ClInclude>
+    <ClInclude Include="Semaphore.h">
+      <Filter>Syncronization</Filter>
+    </ClInclude>
+    <ClInclude Include="MutexRAII.h">
+      <Filter>Syncronization</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPoolData.h">
+      <Filter>ThreadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadExtraWork.h">
+      <Filter>ThreadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="ThreadPool.h">
+      <Filter>ThreadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasks.h">
+      <Filter>ThreadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleThread.h">
+      <Filter>ThreadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseLogger.h">
+      <Filter>Loggers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Loggers">
+      <UniqueIdentifier>{04d601ef-c745-4556-a6d5-100eee6d299f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Syncronization">
+      <UniqueIdentifier>{2e66e719-03df-4a53-95a4-6fd8f06da3f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ThreadPool">
+      <UniqueIdentifier>{1d831f06-1366-42d0-b9a9-e3418e53d880}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

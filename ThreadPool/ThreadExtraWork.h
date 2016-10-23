@@ -24,6 +24,9 @@ private:
 	virtual void notifyExit() = 0;
 protected:
 	ThreadInfo threadInfo;
+	bool isAlive;
+private:
+	const bool isCanCompleteWork();
 };
 
 class ThreadExtraWorkAllTime :public ThreadExtraWork

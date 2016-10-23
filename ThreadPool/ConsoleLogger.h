@@ -1,13 +1,9 @@
 #pragma once
 
 #include "stdafx.h"
-#include "ILogger.h"
+#include "BaseLogger.h"
 
-class ConsoleLogger :public ILogger
+class ConsoleLogger :public BaseLogger
 {
-	virtual void errorCreateThreadPool(UINT count) override;
-	virtual void createThreadPool(UINT count) override;
-	virtual void addTaskPool(const std::shared_ptr<ThreadDelegateFunctor>& task) override;
-	virtual void errorWorkPool(const std::shared_ptr<ThreadDelegateFunctor>& task, const std::exception* error) override;
-	virtual void errorMaxTask() override;
+	virtual std::ostream & getStream() override;
 };
