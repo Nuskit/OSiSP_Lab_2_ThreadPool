@@ -1,5 +1,14 @@
-#pragma once
+#ifndef SIMPLETHREAD_H_
+#define SIMPLETHREAD_H_
 #include "stdafx.h"
+
+#ifdef WINDOWS_SYSTEM
+#define THREAD_HANDLE HANDLE
+#define THREAD_RETURN_TYPE DWORD
+#else
+#define THREAD_HANDLE pthread_t
+#define THREAD_RETURN_TYPE void*
+#endif
 
 class ThreadPoolData;
 class ThreadExtraWork;
@@ -12,19 +21,20 @@ public:
 	void run(LPVOID lpParam, const bool isAddedThread = false);
 	void setAliveState(const bool value=false);
 	void waitAndDeleteThreadHandle();
-	const bool getAliveState();
+	const volatile bool getAliveState();
 private:
 	ThreadExtraWork* getThread(const bool isAddedThread,LPVOID lpParam);
 
-	ThreadPoolData *poolData;
+  ThreadPoolData* poolData;
 	volatile bool isAlive;
-	HANDLE threadHandle;
+  THREAD_HANDLE threadHandle;
 };
 
 class SimpleThreadWork
 {
 public:
-	static DWORD WINAPI run(LPVOID lpParam);
+  static THREAD_RETURN_TYPE THREAD_RETURN_CALL run(LPVOID lpParam);
 private:
 	SimpleThreadWork();
 };
+#endif

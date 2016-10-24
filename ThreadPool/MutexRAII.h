@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef MUTEXRAII_H_
+#define MUTEXRAII_H_
 #include "stdafx.h"
 
 class Mutex;
@@ -11,3 +11,4 @@ public:
 private:
 	Mutex *mutex;
 };
+#endif

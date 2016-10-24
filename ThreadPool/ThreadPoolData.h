@@ -1,4 +1,5 @@
-#pragma once
+#ifndef THREADPOOLDATA_H_
+#define THREADPOOLDATA_H_
 #include "stdafx.h"
 #include <atomic>
 
@@ -29,3 +30,4 @@ private:
 	std::queue<const SimpleThread*> waitDeleteThread;
 	std::shared_ptr<ILogger> logger_;
 };
+#endif

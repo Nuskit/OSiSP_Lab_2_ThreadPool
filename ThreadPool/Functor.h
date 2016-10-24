@@ -1,11 +1,13 @@
-#pragma once
+#ifndef FUNCTOR_H_
+#define FUNCTOR_H_
 #include "stdafx.h"
+#include <tuple>
 
 class ThreadDelegateFunctor
 {
 public:
 	virtual void complete() = 0;
-	virtual void toString(std::ostream& stream) {};
+  virtual void toString(std::ostream& stream) = 0;
 	virtual ~ThreadDelegateFunctor() {};
 };
 
@@ -55,8 +57,8 @@ public:
 	DelegateFunctorImpl(FT fn, T* obj, Args&&... args) : m_fn(fn), m_obj(obj), m_args(std::forward<Args>(args)...) {  }
 
 	R complete()
-	{
-		return (m_obj->*m_fn)(std::get<Args>(m_args)...);
+  {
+    return (m_obj->*m_fn)(std::get<Args>(m_args)...);
 	}
 
 	void setArgs(Args&&... args)
@@ -73,3 +75,4 @@ private:
 	T* m_obj;
 	std::tuple<Args...> m_args;
 };
+#endif

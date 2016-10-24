@@ -1,4 +1,5 @@
-#pragma once
+#ifndef THREADPOOL_H_
+#define THREADPOOL_H_
 #include "stdafx.h"
 #include <atomic>
 using namespace std;
@@ -42,3 +43,4 @@ private:
 	ThreadPoolData *poolData;
 	bool isCreatePool;
 };
+#endif

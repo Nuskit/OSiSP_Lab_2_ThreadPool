@@ -1,8 +1,18 @@
-#pragma once
-
+#ifndef SEMAPHORE_H_
+#define SEMAPHORE_H_
 #include "stdafx.h"
+#ifndef WINDOWS_SYSTEM
+	#include <semaphore.h>
+	#include <limits.h>
+#endif
 
-#define MAX_COUNT_SEMAPHORE 1000
+#ifdef WINDOWS_SYSTEM
+  #define SYNC_PRIMITIVE_SEMAPHORE HANDLE
+	#define MAX_COUNT_SEMAPHORE 1000
+#else
+  #define SYNC_PRIMITIVE_SEMAPHORE sem_t
+	#define MAX_COUNT_SEMAPHORE SEM_VALUE_MAX
+#endif
 
 class Semaphore
 {
@@ -11,9 +21,9 @@ public:
 	~Semaphore();
 
 	void wait();
-	const bool wait(const DWORD milliSeconds);
+  const bool wait(const ULONG milliSeconds);
 	void pulse();
-	void pulseAll();
 private:
-	HANDLE semaphore;
+  SYNC_PRIMITIVE_SEMAPHORE semaphore;
 };
+#endif

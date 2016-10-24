@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ILOGGER_H_
+#define ILOGGER_H_
 
 #include "stdafx.h"
 
@@ -12,3 +13,4 @@ public:
 	virtual void errorWorkPool(const std::shared_ptr<ThreadDelegateFunctor>& task, const std::exception* error = nullptr) = 0;
 	virtual void errorMaxTask() = 0;
 };
+#endif

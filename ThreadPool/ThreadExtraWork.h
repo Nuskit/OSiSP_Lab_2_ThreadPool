@@ -1,4 +1,5 @@
-#pragma once
+#ifndef THREADEXTRAWORK_H_
+#define THREADEXTRAWORK_H_
 #include "stdafx.h"
 
 class SimpleThread;
@@ -16,7 +17,7 @@ class ThreadExtraWork
 {
 public:
 	ThreadExtraWork(ThreadPoolData* poolData, SimpleThread* simpleThread, LPVOID lpParam);
-	DWORD complete();
+  THREAD_RETURN_TYPE complete();
 	virtual ~ThreadExtraWork();
 private:
 	virtual void waitTask() = 0;
@@ -44,3 +45,4 @@ public:
 	virtual void waitTask() override;
 	virtual void notifyExit() override;
 };
+#endif

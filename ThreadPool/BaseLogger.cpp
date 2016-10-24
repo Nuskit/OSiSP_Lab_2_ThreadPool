@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <fstream>
 #include <ios>
+#include "time.h"
 #include "Mutex.h"
 #include "MutexRAII.h"
 using namespace std;
@@ -21,9 +22,14 @@ BaseLogger::~BaseLogger()
 
 void BaseLogger::writeCurrentTime()
 {
-	auto now = std::chrono::system_clock::now();
-	auto now_c = std::chrono::system_clock::to_time_t(now);
-	getStream() << std::put_time(std::localtime(&now_c), "%c") << endl;
+  time_t rawtime;
+  struct tm* timeinfo;
+  char buffer[80];
+  time(&rawtime);
+  timeinfo=localtime(&rawtime);
+
+  if (0<strftime(buffer,80,"%d-%m-%Y %I:%M:%S",timeinfo))
+    getStream() << buffer << endl;
 }
 
 void BaseLogger::errorCreateThreadPool(UINT count)

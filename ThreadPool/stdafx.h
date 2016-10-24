@@ -1,19 +1,43 @@
-// stdafx.h: включаемый файл дл€ стандартных системных включаемых файлов
-// или включаемых файлов дл€ конкретного проекта, которые часто используютс€, но
-// не часто измен€ютс€
-//
+#ifndef STDAFX_H_
+#define STDAFX_H_
 
-#pragma once
+#ifndef UINT
+typedef unsigned int UINT;
+#endif
 
-// TODO: ”становите здесь ссылки на дополнительные заголовки, требующиес€ дл€ программы
+#ifndef ULONG
+  typedef unsigned long ULONG;
+#endif
+
+#ifndef LPVOID
+  typedef void* LPVOID;
+#endif
+
 #if (defined(WIN32) || defined(WIN64))
-#include <Windows.h>
+  #define WINDOWS_SYSTEM
+#endif
+
+#ifdef WINDOWS_SYSTEM
+  #include <Windows.h>
+#else
+  #include <pthread.h>
+#endif
+
+#ifdef WINDOWS_SYSTEM
+  #define THREAD_HANDLE HANDLE
+  #define THREAD_RETURN_TYPE DWORD
+	#define THREAD_RETURN_CALL WINAPI
+#else
+  #define THREAD_HANDLE pthread_t
+  #define THREAD_RETURN_TYPE void*
+	#define THREAD_RETURN_CALL 
 #endif
 
 #include <list>
 #include <vector>
-#include <tuple>
 #include <queue>
 #include <memory>
-#include <string>
 #include <istream>
+#include <algorithm>
+#include <atomic>
+#endif

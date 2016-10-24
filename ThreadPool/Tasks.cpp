@@ -17,7 +17,7 @@ Tasks::~Tasks()
 
 const std::shared_ptr<ThreadDelegateFunctor> Tasks::getTask()
 {
-	MutexRAII taskMutex(taskMutex);
+  MutexRAII taskWorkMutex(taskMutex);
 	auto task = tasks.front();
 	tasks.pop();
 	return task;
@@ -25,7 +25,7 @@ const std::shared_ptr<ThreadDelegateFunctor> Tasks::getTask()
 
 void Tasks::addTask(const std::shared_ptr<ThreadDelegateFunctor>& task)
 {
-	MutexRAII taskMutex(taskMutex);
+  MutexRAII taskWorkMutex(taskMutex);
 	tasks.push(task);
 }
 

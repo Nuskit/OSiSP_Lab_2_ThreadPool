@@ -26,7 +26,7 @@ const bool ThreadExtraWork::isCanCompleteWork()
 	return isAlive&&threadInfo.simpleThread->getAliveState();
 }
 
-DWORD ThreadExtraWork::complete()
+THREAD_RETURN_TYPE ThreadExtraWork::complete()
 {
 	while (isCanCompleteWork())
 	{

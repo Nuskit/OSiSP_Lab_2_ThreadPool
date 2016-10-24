@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BASELOGGER_H_
+#define BASELOGGER_H_
 
 #include "stdafx.h"
 #include "ILogger.h"
@@ -21,3 +22,4 @@ protected:
 private:
 	Mutex* mutex;
 };
+#endif

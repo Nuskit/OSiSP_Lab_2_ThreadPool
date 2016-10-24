@@ -84,8 +84,14 @@ void ThreadPool::deletePool()
 void ThreadPool::setSimpleThreadTerminatedCondition()
 {
 	for (UINT i = 0; i < simpleThreads.size(); ++i)
+  {
 		simpleThreads[i]->setAliveState(false);
-	poolData->getThreadSemaphore().pulseAll();
+  }
+
+	for (UINT i = 0; i < simpleThreads.size(); ++i)
+	{
+		poolData->getThreadSemaphore().pulse();
+	}
 }
 
 void ThreadPool::deleteSimpleThread()

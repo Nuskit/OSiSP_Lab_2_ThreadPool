@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TASKS_H_
+#define TASKS_H_
 #include "stdafx.h"
 
 class ThreadDelegateFunctor;
@@ -15,4 +16,4 @@ private:
 	Mutex* taskMutex;
 	std::queue<std::shared_ptr<ThreadDelegateFunctor>> tasks;
 };
-
+#endif

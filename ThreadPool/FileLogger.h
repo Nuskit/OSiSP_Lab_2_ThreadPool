@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FILELOGGER_H_
+#define FILELOGGER_H_
 
 #include "stdafx.h"
 #include "BaseLogger.h"
@@ -14,3 +15,4 @@ protected:
 private:
 	std::ofstream stream;
 };
+#endif
